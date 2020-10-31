@@ -116,7 +116,7 @@
 ## <span id="head9">3.2 调度器模块</span>
 调度器模块接收`Merge`组件发来的Task信号。我们实现了四种不同的调度算法，本节将一一讲解。
 
-## <span id="head10">3.2.1 先进先出、固定优先级算法（FIFO、FP）</span>
+### <span id="head10">3.2.1 先进先出、固定优先级算法（FIFO、FP）</span>
 由于FIFO算法是FP算法priority = 1的特殊情况，故我们用同一模块实现FIFO算法和FP算法。如图6，in端口输入的是来自四个Task的信号，in信号发送到`RecordDisassembler`进行解码，得到两个信号，分别是computationTime和priority，这两个信号是Task的执行参数。我们添加了一个参数isFIFO，让我们不加修改即可实现两种调度算法：
 
   * 当isFIFO设置为1时，该模块是是一个FIFO调度器，所有Task的优先级相同，都为1；
@@ -131,7 +131,7 @@
 <div align=center> 图 6 FIFO/FP调度器设计 </div>
 
 
-## <span id="head11">3.2.2 最早截止时间优先算法（EDF）</span>
+### <span id="head11">3.2.2 最早截止时间优先算法（EDF）</span>
 
 <div align=center><img src="/Users/snake0/ptolemy-hw1/img/edfpri.png" width="120%"></div>
 
@@ -143,7 +143,7 @@
 
 <div align=center> 图 8 EDF调度器设计 </div>
 
-## <span id="head12">3.2.3 循环调度算法 （Round-Robin）</span>
+### <span id="head12">3.2.3 循环调度算法 （Round-Robin）</span>
 
 <div align=center><img src="/Users/snake0/ptolemy-hw1/img/rr.png" width="120%"></div>
 
@@ -172,7 +172,7 @@
 
 # <span id="head14">4 调度算法实验分析</span>
 本章通过设定每个任务的computationTime，priority，startTime，relativeDeadline，运行上述章节所设计的仿真系统，对四种调度算法进行仿真，获取调度折线图，从而观察其优缺点。
-# <span id="head15">4.1 实验设定</span>
+## <span id="head15">4.1 实验设定</span>
 如下表所示，在四个调度器的实验中，我们设定了相同的实验参数，从而比较不同调度算法的特性与优缺点。我们对RunningPlotter所做的图像进行了采集，而SchedulerPlotter包含了与RunningPlotter相同的调度信息，本文限于篇幅，没有对SchedulerPlotter做出的图像进行采集。对于Round-Robin算法，我们取timeSlice = 0.1
 |  Task ID   | computationTime | priority | startTime | relativeDeadline | absoluteDeadline |
 |  :----:  | :----:  | :----: | :----: | :----: | :----: |
@@ -181,7 +181,7 @@
 | 3 | 9 | 1 | 1 | 3 | 4 |
 | 4 | 5 | 3 | 10 | 6 | 16 |
 
-# <span id="head16">4.2 先进先出算法（First In First Out，FIFO）</span>
+## <span id="head16">4.2 先进先出算法（First In First Out，FIFO）</span>
 如图13所示，红色折线代表Task 1，蓝色折线代表Task 2，绿色折线代表Task 3，黑色折线代表Task 4。当任务被调度运行时，折线处于高位。当任务在等待，或任务已经完成执行时，折线处于低位。图13展示了先进先出算法的调度结果。观察可知，task 1具有较长的computationTime，但由于其到达时间最晚，它被最后执行，导致其完成时间（finish time）远远超过了截止时间（deadline）。若小球要向前运动从而避免撞到障碍物，那么小球将会大概率地撞到障碍物。
 
 这是因为先进先出算法没有将任务的优先级、deadline考虑在调度算法中，仅仅根据任务到达时间的先后对任务进行调度。但是该调度算法有实现简单的优点，如3.2.1节所示，我们几乎无需修改原有的`Server`模块就实现了先进先出的调度算法。由于其实现简单，对实时系统中任务的性能影响十分小。
@@ -190,21 +190,21 @@
 
 <div align=center> 图 13 先进先出算法调度折线图 </div>
 
-# <span id="head17">4.3 固定优先级算法（Fixed Priority，FP）</span>
+## <span id="head17">4.3 固定优先级算法（Fixed Priority，FP）</span>
 折线颜色、高低含义同4.2节所述，图14展示了固定优先级算法的调度结果。在我们的系统中，Task 2具有最低的优先级，故会经常被其他任务所抢占，导致其完成时间远远超出了截止时间。然而优先级最高的Task 3在到来时就被立刻执行。假设Task 3对应的向左运用对于小球优先级最高，如在一个向左追赶小球的游戏场景，固定优先级算法能最大化的保证游戏的胜利。然而，向前的活动被经常抢占，出现了“饿死”（Starvation）现象。
 
 <div align=center><img src="/Users/snake0/ptolemy-hw1/img/fpre.png" width="70%"></div>
 
 <div align=center> 图 14 固定优先级算法调度折线图 </div>
 
-# <span id="head18">4.4 循环调度算法 （Round-Robin）</span>
+## <span id="head18">4.4 循环调度算法 （Round-Robin）</span>
 折线颜色、高低含义同4.2节所述，图15展示了循环调度算法的调度结果。在循环调度算法中，系统出现了频繁的上下文切换。虽然所有任务均得到了公平的执行时间，但是会给优先级很高的任务，如Task 3，造成巨大的影响。考虑4.3节提到的追赶游戏场景，小球将无法逃脱追赶；而且由于频繁的上下文切换，小球变换方向所需的能量很大，这对小球是一种负担。
 
 <div align=center><img src="/Users/snake0/ptolemy-hw1/img/rrre.png" width="70%"></div>
 
 <div align=center> 图 15 循环调度算法调度折线图 </div>
 
-# <span id="head19">4.5 最早截止时间优先算法（Earliest Deadline First，EDF）</span>
+## <span id="head19">4.5 最早截止时间优先算法（Earliest Deadline First，EDF）</span>
 折线颜色、高低含义同4.2节所述，图16展示了最早截止时间优先算法的调度结果。由于EDF对deadline miss有最优性，该算法保证了数量最少的deadline miss（见实验配置表格所示）。假设有这样一个游戏场景，小球必须在指定时间到达某一平面区域，到达该平面区域所需的时间是computationTime，那么到达时间的要求是absoluteDeadline。EDF调度算法保证了这类游戏的最大胜利。
 
 <div align=center><img src="/Users/snake0/ptolemy-hw1/img/edfre.png" width="70%"></div>
@@ -214,7 +214,7 @@
 # <span id="head20">5 代码实现与运行步骤</span>
 本系统的实验代码以及实验环境已开源，Github地址为 [https://github.com/snake0/ptolemy-hw1](https://github.com/snake0/ptolemy-hw1)。本章对运行过程进行简要的叙述，并描述代码的实现。
 
-# <span id="head21">5.1 运行步骤</span>
+## <span id="head21">5.1 运行步骤</span>
 
 如图17所示，只需点按绿色的运行按钮，系统就开始运行。可以看到`RunningPlotter`以及`SchedulerPlotter`中展示的折线随着时间慢慢被画出，也可观察到小球的运动。当所有任务执行完成后，点按红色的停止按钮，即可结束仿真。我们可以通过将`GetTaskId`的输入切换到不同的Scheduler模块，从而实现对不同调度策略的观察。
 
@@ -222,7 +222,7 @@
 
 <div align=center> 图 17 仿真系统的运行 </div>
 
-# <span id="head22">5.2 代码结构</span>
+## <span id="head22">5.2 代码结构</span>
 如下是我们在AdvancedServer.java中添加的代码。其含义是，在Server模块每次调用`fire()`函数时，我们检查currentJob。如果currentJob不为空，那么输出这个Job，否则输出null。这样我们设计的`AdvancedServer`模块即可在每个时钟周期输出其正在运行的Task。我们还给Server模块添加了trigger输入，从而接收时钟信号。
 ```java
 for (int i = 0; i < trigger.getWidth(); i++) {
@@ -242,7 +242,7 @@ for (int i = 0; i < trigger.getWidth(); i++) {
 
 
 
-## <span id="head23"> 参考文献</span>
+# <span id="head23"> 参考文献</span>
 - `1` [2019. The Ptolemy Project. https://ptolemy.berkeley.edu/ptolemyII/index.htm](https://ptolemy.berkeley.edu/ptolemyII/index.htm) 
 - `2` [信息物理融合系统（CPS）设计、建模与仿真 基于Ptolemy Ⅱ平台 （美）爱德华·阿什福德·李编著_北京：机械工业出版社 , 2017.02_P374](https://item.jd.com/12134878.html) 
 
